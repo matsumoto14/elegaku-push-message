@@ -14,8 +14,8 @@ import (
 )
 
 type MessageObj struct {
-	UserID  string
-	Message string
+	UserID  string `json:"userId"`
+	Message string `json:"message"`
 }
 
 /* メッセージ送信 */
@@ -39,14 +39,11 @@ func sendMessage(bot *linebot.Client, p *events.SQSMessage) error {
 
 func handler(ctx context.Context, sqsEvent events.SQSEvent) error {
 
-	// ボットの定義
 	fmt.Println("*** linebot new")
-	bot, err := linebot.New(
-		os.Getenv("CHANNELSECRET"),
-		os.Getenv("ACCESSTOKEN"),
-	)
+	// LINEのBotの設定
+	bot, err := linebot.New(os.Getenv("LINE_CHANNEL_SECRET"), os.Getenv("LINE_CHANNEL_ACCESS_TOKEN"))
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("linebot new error.[%s]", err)
 	}
 
 	// メッセージをSQSから取得
@@ -54,7 +51,7 @@ func handler(ctx context.Context, sqsEvent events.SQSEvent) error {
 		// メッセージ送信
 		err := sendMessage(bot, &message)
 		if err != nil {
-			log.Fatal(err)
+			return fmt.Errorf("sendMessage error.[%s]", err)
 		}
 	}
 
