@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -22,10 +21,12 @@ type MessageObj struct {
 func sendMessage(bot *linebot.Client, p *events.SQSMessage) error {
 	// 取得したMessageをデコードする。。
 	fmt.Println("*** message decode")
-	message := MessageObj{"", ""}
-	if err := json.NewDecoder(strings.NewReader(p.Body)).Decode(&message); err != nil {
-		fmt.Println(err)
-		return fmt.Errorf("massages decode error.[%s]", p.Body)
+
+	var message MessageObj
+
+	err := json.Unmarshal([]byte(p.Body), &message)
+	if err != nil {
+		return fmt.Errorf("*** message decode error.[%s]", err)
 	}
 
 	fmt.Println("*** push")
